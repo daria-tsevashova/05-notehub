@@ -24,22 +24,24 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const perPage = 12;
-
   const [debouncedQuery] = useDebounce(query, 500);
 
   const onOpen = () => setIsModalOpen(true);
   const onClose = () => setIsModalOpen(false);
 
-  const { error, data, isLoading, isSuccess } = useQuery<NotesData>({
+  const { data, error, isLoading, isSuccess } = useQuery<NotesData, Error>({
     queryKey: ["notes", debouncedQuery, currentPage],
     queryFn: () => fetchNotes(currentPage, perPage, debouncedQuery),
-    keepPreviousData: true,
+    placeholderData: (prev) => prev,
   });
+
+  const notesData = data as NotesData | undefined;
+
+  const notesList = notesData?.notes ?? [];
 
   return (
     <div className={css.app}>
       <Toaster position="top-right" />
-
       <header className={css.toolbar}>
         <SearchBox
           value={query}
@@ -49,11 +51,11 @@ const App = () => {
           }}
         />
 
-        {data && data.totalPages > 1 && (
+        {notesData && notesData.totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            totalPages={data.totalPages}
+            totalPages={notesData.totalPages}
           />
         )}
 
@@ -61,17 +63,11 @@ const App = () => {
           Create note +
         </button>
       </header>
-
-      {isLoading && <Loader isLoading={isLoading} />}
+      {isLoading && <Loader loading={isLoading} />}
       {error && <ErrorMessage />}
 
-      {isSuccess && data?.notes.length > 0 && (
-        <>
-          <NotesList notes={data.notes} />
-        </>
-      )}
-
-      {isSuccess && data?.notes.length === 0 && <p>No notes found</p>}
+      {isSuccess && notesList.length > 0 && <NotesList notes={notesList} />}
+      {isSuccess && notesList.length === 0 && <p>No notes found</p>}
 
       {isModalOpen && (
         <Modal onClose={onClose}>
