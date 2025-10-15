@@ -15,7 +15,7 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
   const createMutation = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
-      queryClient.invalidateQueries(["notes"]);
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note created successfully!");
       onClose();
     },
@@ -98,7 +98,7 @@ const NoteForm = ({ onClose }: NoteFormProps) => {
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting || createMutation.isLoading}
+              disabled={isSubmitting || createMutation.isPending}
             >
               Create note
             </button>
