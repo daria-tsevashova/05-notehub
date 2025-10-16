@@ -1,6 +1,6 @@
 import axios from "axios";
 import type { AxiosResponse } from "axios";
-import type { Note } from "../types/note";
+import type { CreateNoteData, Note } from "../types/note";
 
 interface CreateNoteResponse {
   note: Note;
@@ -22,17 +22,19 @@ const apiClient = axios.create({
   },
 });
 
-const createNote = async (note: Note): Promise<CreateNoteResponse> => {
+const createNote = async (
+  noteData: CreateNoteData
+): Promise<CreateNoteResponse> => {
   const response: AxiosResponse<CreateNoteResponse> = await apiClient.post(
     "/notes",
-    note
+    noteData
   );
   return response.data;
 };
 
 const fetchNotes = async (
-  page: number,
-  perPage: number,
+  page?: number,
+  perPage?: number,
   search?: string
 ): Promise<FetchNotesResponse> => {
   const response: AxiosResponse<FetchNotesResponse> = await apiClient.get(
